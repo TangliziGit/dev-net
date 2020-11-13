@@ -38,7 +38,7 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: orderer
     volumes:
-        - ./system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+        - ./generated/system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
         - ./orgs/ordererOrgs/tanglizi.one/orderers/orderer.tanglizi.one/msp:/var/hyperledger/orderer/msp
         - ./orgs/ordererOrgs/tanglizi.one/orderers/orderer.tanglizi.one/tls/:/var/hyperledger/orderer/tls
         - orderer.tanglizi.one:/var/hyperledger/production/orderer

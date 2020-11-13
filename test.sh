@@ -1,7 +1,7 @@
 . ./scripts/envs.sh
 
 export PATH="${PWD}/bin":$PATH
-export FABRIC_CFG_PATH=${PWD}/def-config
+export FABRIC_CFG_PATH=${PWD}/
 
 CHANNEL_NAME="mychannel"
 CC_NAME="basic"

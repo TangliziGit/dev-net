@@ -127,13 +127,15 @@ function createOrderer() {
 . ./scripts/envs.sh
 
 export PATH=${PWD}/bin:$PATH
-export FABRIC_CFG_PATH=${PWD}/configtx
+export FABRIC_CFG_PATH=${PWD}/
+
+mkdir -p generated
+mkdir -p orgs
 
 # create fabric-ca for peer org and orderer org
-# the dockerfile
 IMAGE_TAG="latest" docker-compose -f docker-compose-fabric-ca.yaml up -d
 
-# wait for creating dirs
+# wait for raft
 sleep 4
 
 # register and enroll orgs to create msp and tls-cert
@@ -141,12 +143,8 @@ createOrg1
 createOrderer
 succ "successfully create org1, org2 and orderer org"
 
-# generate connection configs
-# it is not necessary
-# ./scripts/ccp-generate.sh
-
 # generate orderer system and genesis block
-configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock ${PWD}/system-genesis-block/genesis.block
+configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock ${PWD}/generated/system-genesis-block/genesis.block
 
 # start up the two org and one orderer network
 COMPOSE_PROJECT_NAME="dev-net" IMAGE_TAG="latest" docker-compose -f docker-compose-test-net.yaml up -d
@@ -154,27 +152,25 @@ docker ps -a
 
 # create channel
 CHANNEL_NAME="mychannel"
-FABRIC_CFG_PATH=${PWD}/configtx
-configtxgen -profile TwoOrgsChannel -outputCreateChannelTx ./channel-artifacts/${CHANNEL_NAME}.tx -channelID $CHANNEL_NAME
-configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts/Org1MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org1MSP
+configtxgen -profile TwoOrgsChannel -outputCreateChannelTx ./generated/channel-artifacts/${CHANNEL_NAME}.tx -channelID $CHANNEL_NAME
+configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./generated/channel-artifacts/Org1MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org1MSP
 succ "successfully generate channel tx and two org anchor tx"
 
 # introduce core.yaml config
-FABRIC_CFG_PATH=$PWD/def-config/
 export ORDERER_CA=${PWD}/orgs/ordererOrgs/tanglizi.one/orderers/orderer.tanglizi.one/msp/tlscacerts/tlsca.tanglizi.one-cert.pem
 export PEER0_ORG1_CA=${PWD}/orgs/peerOrgs/org1.tanglizi.one/peers/peer0.org1.tanglizi.one/tls/ca.crt
 export CORE_PEER_TLS_ENABLED=true
 
 orgenv 1
-poll "peer channel create -o localhost:7050 -c $CHANNEL_NAME --ordererTLSHostnameOverride orderer.tanglizi.one -f ./channel-artifacts/${CHANNEL_NAME}.tx --outputBlock ./channel-artifacts/${CHANNEL_NAME}.block --tls --cafile $ORDERER_CA"
+poll "peer channel create -o localhost:7050 -c $CHANNEL_NAME --ordererTLSHostnameOverride orderer.tanglizi.one -f ./generated/channel-artifacts/${CHANNEL_NAME}.tx --outputBlock ./generated/channel-artifacts/${CHANNEL_NAME}.block --tls --cafile $ORDERER_CA"
 succ "successfully create channel"
 
 ## Join all the peers to the channel
-poll "peer channel join -b ./channel-artifacts/$CHANNEL_NAME.block"
+poll "peer channel join -b ./generated/channel-artifacts/$CHANNEL_NAME.block"
 succ "successfully joined"
 
 ## Set the anchor peers for each org in the channel
-poll "peer channel update -o localhost:7050 --ordererTLSHostnameOverride orderer.tanglizi.one -c $CHANNEL_NAME -f ./channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx --tls --cafile $ORDERER_CA"
+poll "peer channel update -o localhost:7050 --ordererTLSHostnameOverride orderer.tanglizi.one -c $CHANNEL_NAME -f ./generated/channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx --tls --cafile $ORDERER_CA"
 succ "successfully set anchor peers"
 
 docker-compose -f docker-compose-test-net.yaml logs -f

@@ -1,6 +1,6 @@
 # deploy chaincode
 export PATH="${PWD}/bin":$PATH
-export FABRIC_CFG_PATH=${PWD}/def-config
+export FABRIC_CFG_PATH=${PWD}/
 CHANNEL_NAME="mychannel"
 CC_NAME=${1:-"basic"}
 CC_SRC_PATH="./chaincode/${CC_NAME}/"
@@ -24,15 +24,15 @@ echo "deploying" $CC_NAME $CC_SRC_PATH
 
 ## package the chaincode
 orgenv 1
-peer lifecycle chaincode package ./tmp/${CC_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CC_NAME}_${CC_VERSION} 
+peer lifecycle chaincode package ./generated/${CC_NAME}.tar.gz --path ${CC_SRC_PATH} --lang ${CC_RUNTIME_LANGUAGE} --label ${CC_NAME}_${CC_VERSION} 
 succ "successfully package the chaincode"
 
 ## Install chaincode on peer0.org1 and peer0.org2
-peer lifecycle chaincode install ./tmp/${CC_NAME}.tar.gz
+peer lifecycle chaincode install ./generated/${CC_NAME}.tar.gz
 succ "successfully install the chaincode"
 
 ## query whether the chaincode is installed
-peer lifecycle chaincode queryinstalled > ./tmp/log.txt
+peer lifecycle chaincode queryinstalled > ./generated/log.txt
 PACKAGE_ID=$(sed -n "/${CC_NAME}_${CC_VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" ./tmp/log.txt)
 succ "query package id: ${PACKAGE_ID}"
  
