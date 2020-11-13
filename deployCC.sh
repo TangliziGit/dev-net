@@ -33,7 +33,7 @@ succ "successfully install the chaincode"
 
 ## query whether the chaincode is installed
 peer lifecycle chaincode queryinstalled > ./generated/log.txt
-PACKAGE_ID=$(sed -n "/${CC_NAME}_${CC_VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" ./tmp/log.txt)
+PACKAGE_ID=$(sed -n "/${CC_NAME}_${CC_VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" ./generated/log.txt)
 succ "query package id: ${PACKAGE_ID}"
  
 ## approve the definition for org1

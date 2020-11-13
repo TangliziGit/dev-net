@@ -21,8 +21,8 @@ ALL_INVOKE_PARMS="-o localhost:7050 --ordererTLSHostnameOverride orderer.tangliz
 
 # you can write cli command below.
 
-# peer chaincode invoke $ALL_INVOKE_PARMS \
-#     -c '{"function":"InitLedger", "Args": []}'
+peer chaincode invoke $ALL_INVOKE_PARMS \
+    -c '{"function":"InitLedger", "Args": []}'
 
 peer chaincode invoke $ALL_INVOKE_PARMS \
     -c '{"function":"ReadAsset", "Args": ["asset2"]}'
