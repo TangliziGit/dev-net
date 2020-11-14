@@ -17,13 +17,13 @@ export CORE_PEER_TLS_ENABLED=true
 
 orgenv 1
 peerenv 1
-ALL_INVOKE_PARMS="-o localhost:7050 --ordererTLSHostnameOverride orderer.tanglizi.one --tls --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} $PEER_CONN_PARMS"
+export ALL_INVOKE_PARMS="-o localhost:7050 --ordererTLSHostnameOverride orderer.tanglizi.one --tls --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} $PEER_CONN_PARMS"
 
-# you can write cli command below.
-
-peer chaincode invoke $ALL_INVOKE_PARMS \
-    -c '{"function":"InitLedger", "Args": []}'
-
-peer chaincode invoke $ALL_INVOKE_PARMS \
-    -c '{"function":"ReadAsset", "Args": ["asset2"]}'
-
+# You can use exported params to run cli commands.
+# 
+# Example:
+# 
+# > . ./env.sh
+# > peer chaincode invoke $ALL_INVOKE_PARMS -c '{"function":"InitLedger", "Args": []}'
+# > peer lifecycle chaincode queryapproved -C mychannel -n basic --output json
+#
